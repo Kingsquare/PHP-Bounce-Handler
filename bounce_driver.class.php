@@ -590,12 +590,14 @@ class BounceHandler {
 				$ddc = $this->decode_diagnostic_code($temp['Diagnostic-code']['text']);
 			}
 			$judgement = $this->get_action_from_status_code($ddc);
+
 			if ($judgement == 'transient') {
 				if (stristr($temp['Action'],'failed') !== false) {
 					$temp['Action']='transient';
 					$temp['Status']='4.3.0';
 				}
 			}
+
 			$hash['per_recipient'][$i]='';
 			$hash['per_recipient'][$i]=$temp;
 		}
@@ -634,12 +636,11 @@ class BounceHandler {
 	 */
 	function find_recipient($per_rcpt) {
 		$recipient = '';
-		if (isset($per_rcpt['Original-recipient'])) {
-			if ($per_rcpt['Original-recipient']['addr'] !== '') {
-				$recipient = $per_rcpt['Original-recipient']['addr'];
-			} else if ($per_rcpt['Final-recipient']['addr'] !== '') {
-				$recipient = $per_rcpt['Final-recipient']['addr'];
-			}
+		if (!empty($per_rcpt['Original-recipient']['addr'])) {
+			$recipient = $per_rcpt['Original-recipient']['addr'];
+		}
+		if (!empty($per_rcpt['Final-recipient']['addr'])) {
+			$recipient = $per_rcpt['Final-recipient']['addr'];
 		}
 		return $this->strip_angle_brackets($recipient);
 	}
@@ -914,7 +915,7 @@ class BounceHandler {
 	private function format_final_recipient_array($arr) {
 		$output = array('addr'=>'',
 						'type'=>'');
-		if (strpos($arr[0], '@')!==FALSE) {
+		if (strpos($arr[0], '@') !== false) {
 			$output['addr'] = $this->strip_angle_brackets($arr[0]);
 			$output['type'] = (!empty($arr[1])) ? trim($arr[1]) : 'unknown';
 		} else {
